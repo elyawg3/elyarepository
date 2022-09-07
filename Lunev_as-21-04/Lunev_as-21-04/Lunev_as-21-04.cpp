@@ -3,9 +3,12 @@
 
 #include <iostream>
 
-int main()
+using namespace std;
+
+int main2()
 {
     std::cout << "Hello World!\n";
+    return 0;
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
