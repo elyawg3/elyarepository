@@ -7,8 +7,8 @@ int main()
 {
     setlocale(LC_ALL, "Rus");
     int x;
+    cout << "Hello World!" << endl;
     cout << "Введите символ: ";
     cin >> x;
-    cout << "Hello World!" << endl;
     return 0;
 }
