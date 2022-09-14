@@ -10,4 +10,5 @@ int main()
     cout << "Введите символ: ";
     cin >> x;
     cout << "Hello World!" << endl;
+    return 0;
 }
