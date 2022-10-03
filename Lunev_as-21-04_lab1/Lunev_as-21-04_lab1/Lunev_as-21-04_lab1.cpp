@@ -1,8 +1,10 @@
 ﻿#include <iostream>
 #include <string>
+#include <fstream>
 
 
 using namespace std;
+
 
 struct Pipe {
 	float Length, Diameter;
@@ -11,12 +13,10 @@ struct Pipe {
 
 struct Station {
 	string Name;
-	int NumWShop, NumWShopInWork;
+	int NumWShop, NumWShopInWork, NumWShopSL;
 	double Efficiency;
-	bool Launch;
+	int LaunchStop;
 };
-
-
 
 void menuPrint()
 {
@@ -34,6 +34,10 @@ void MenuClear() {
 	system("cls");
 }
 
+void CinClear() {
+	cin.clear();
+	cin.ignore(312312, '\n');
+}
 
 void createPipe(struct Pipe& pipe)
 {
@@ -42,8 +46,7 @@ void createPipe(struct Pipe& pipe)
 	for (;;) {
 		if (cin.fail()) {
 			cout << "Ошибка! Данные некорректны\n";
-			cin.clear();
-			cin.ignore(312312, '\n');
+			CinClear();
 			cout << "Введите длину трубы: ";
 			cin >> pipe.Length;
 		}
@@ -63,8 +66,7 @@ void createPipe(struct Pipe& pipe)
 	for (;;) {
 		if (cin.fail()) {
 			cout << "Ошибка! Данные некорректны\n";
-			cin.clear();
-			cin.ignore(312312, '\n');
+			CinClear();
 			cout << "Введите диаметр трубы: ";
 			cin >> pipe.Diameter;
 		}
@@ -84,8 +86,7 @@ void createPipe(struct Pipe& pipe)
 	for (;;) {
 		if (cin.fail()) {
 			cout << "Ошибка! Данные некорректны\n";
-			cin.clear();
-			cin.ignore(312312, '\n');
+			CinClear();
 			cout << "В ремонте(1 - да, 0 - нет): ";
 			cin >> pipe.InRepair;
 		}
@@ -106,8 +107,7 @@ void createCStation(struct Station& cstation)
 		getline(cin, cstation.Name);
 		if (cin.fail()) {
 			cout << "Ошибка! Данные некорректны\n";
-			cin.clear();
-			cin.ignore(312312, '\n');
+			CinClear();
 			cout << "Введите название компрессорной станции: ";
 			getline(cin, cstation.Name);
 		}
@@ -121,8 +121,7 @@ void createCStation(struct Station& cstation)
 	for (;;) {
 		if (cin.fail()) {
 			cout << "Ошибка! Данные некорректны\n";
-			cin.clear();
-			cin.ignore(312312, '\n');
+			CinClear();
 			cout << "Введите количество цехов компрессорной станции: ";
 			cin >> cstation.NumWShop;
 		}
@@ -132,8 +131,7 @@ void createCStation(struct Station& cstation)
 			}
 			else {
 				cout << "Количество цехов должно быть положительно!" << endl;
-				cin.clear();
-				cin.ignore(312312, '\n');
+				CinClear();
 				cout << "Введите количество цехов компрессорной станции: ";
 				cin >> cstation.NumWShop;
 			}
@@ -144,8 +142,7 @@ void createCStation(struct Station& cstation)
 	for (;;) {
 		if (cin.fail()) {
 			cout << "Ошибка! Данные некорректны\n";
-			cin.clear();
-			cin.ignore(312312, '\n');
+			CinClear();
 			cout << "Введите количество цехов в работе: ";
 			cin >> cstation.NumWShopInWork;
 		}
@@ -156,43 +153,18 @@ void createCStation(struct Station& cstation)
 				}
 				else {
 					cout << "Количество цехов в работе должно быть меньше или равно количеству цехов в целом!" << endl;
-					cin.clear();
-					cin.ignore(312312, '\n');
+					CinClear();
 					cout << "Введите количество цехов в работе компрессорной станции: ";
 					cin >> cstation.NumWShopInWork;
 				}
 			}
 			else {
 				cout << "Количество цехов в работе должно быть положительно!" << endl;
-				cin.clear();
-				cin.ignore(312312, '\n');
+				CinClear();
 				cout << "Введите количество цехов в работе компрессорной станции: ";
 				cin >> cstation.NumWShopInWork;
 			}
 
-		}
-	}
-	cout << "Запустить станцию(1 - да, 0 - нет): ";
-	cin >> cstation.Launch;
-	for (;;) {
-		if (cin.fail()) {
-			cout << "Ошибка! Данные некорректны\n";
-			cin.clear();
-			cin.ignore(312312, '\n');
-			cout << "Запустить станцию(1 - да, 0 - нет): ";
-			cin >> cstation.Launch;
-		}
-		else {
-			if ((cstation.Launch != 1) && (cstation.Launch != 0)) {
-				cout << "Ошибка! Данные некорректны\n";
-				cin.clear();
-				cin.ignore(312312, '\n');
-				cout << "Запустить станцию(1 - да, 0 - нет): ";
-				cin >> cstation.Launch;
-			}
-			else {
-				break;
-			}
 		}
 	}
 	cstation.Efficiency = (double(cstation.NumWShopInWork) / double(cstation.NumWShop)) * 100;
@@ -201,7 +173,7 @@ void createCStation(struct Station& cstation)
 	cout << "Компрессорная станция добавлена\n";
 }
 
-void ViewObject(struct Pipe& pipe, struct Station& cstation) {
+void ViewObject(struct  Pipe& const pipe, struct  Station& const cstation) {
 	MenuClear();
 	int NumViewMenu;
 	for (;;) {
@@ -229,12 +201,6 @@ void ViewObject(struct Pipe& pipe, struct Station& cstation) {
 				cout << "Имя компрессорной станции: " << cstation.Name << endl << "Количество цехов компрессорной станции: " << cstation.NumWShop << endl
 					<< "Количество цехов в работе компрессорной станции : " << cstation.NumWShopInWork << endl << "Эффективность компрессорной станции: " << cstation.Efficiency
 					<< "%" << endl;
-				if (cstation.Launch == 0) {
-					cout << "Кс остановлена" << endl;
-				}
-				if (cstation.Launch == 1) {
-					cout << "Кс запущена" << endl;
-				}
 				return;
 			}
 			else {
@@ -245,8 +211,7 @@ void ViewObject(struct Pipe& pipe, struct Station& cstation) {
 		default:
 			MenuClear();
 			cout << "Число некорректно" << endl;
-			cin.clear();
-			cin.ignore(312312, '\n');
+			CinClear();
 			break;
 		}
 	}
@@ -258,58 +223,13 @@ void EditPipe(struct Pipe& pipe) {
 	for (;;) {
 		if ((pipe.Length > 0) && (pipe.Diameter > 0)) {
 			cout << "Редактирование трубы\n";
-			cout << "Длина трубы: " << pipe.Length << endl;
-			cout << "Введите новую длину трубы: ";
-			cin >> pipe.Length;
-			for (;;) {
-				if (cin.fail()) {
-					cout << "Ошибка! Данные некорректны\n";
-					cin.clear();
-					cin.ignore(312312, '\n');
-					cout << "Введите длину трубы: ";
-					cin >> pipe.Length;
-				}
-				else {
-					if (pipe.Length <= 0) {
-						cout << "Длина трубы должна быть больше 0!\n";
-						cout << "Введите длину трубы: ";
-						cin >> pipe.Length;
-					}
-				}
-				if ((pipe.Length > 0) && (!cin.fail())) {
-					break;
-				}
-			}
-			cout << "Диаметр трубы: " << pipe.Diameter << endl;
-			cout << "Введите новый диаметр трубы: ";
-			cin >> pipe.Diameter;
-			for (;;) {
-				if (cin.fail()) {
-					cout << "Ошибка! Данные некорректны\n";
-					cin.clear();
-					cin.ignore(312312, '\n');
-					cout << "Введите диаметр трубы: ";
-					cin >> pipe.Diameter;
-				}
-				else {
-					if (pipe.Diameter <= 0) {
-						cout << "Диаметр трубы должен быть больше 0!\n";
-						cout << "Введите диаметр трубы: ";
-						cin >> pipe.Diameter;
-					}
-				}
-				if ((pipe.Diameter > 0) && (!cin.fail())) {
-					break;
-				}
-			}
 			cout << "В ремонте: " << pipe.InRepair << endl;
 			cout << "В ремонте? (1 - да, 0 - нет)";
 			cin >> pipe.InRepair;
 			for (;;) {
 				if (cin.fail()) {
 					cout << "Ошибка! Данные некорректны\n";
-					cin.clear();
-					cin.ignore(312312, '\n');
+					CinClear();
 					cout << "В ремонте(1 - да, 0 - нет): ";
 					cin >> pipe.InRepair;
 				}
@@ -336,138 +256,66 @@ void EditPipe(struct Pipe& pipe) {
 void EditStation(struct Station& cstation) {
 	MenuClear();
 	for (;;) {
-		if ((cstation.NumWShop > 0) && (cstation.NumWShopInWork > 0) && (cstation.NumWShop >= cstation.NumWShopInWork) && (!cstation.Name.empty())) {
-			cout << "Редактирование кс\n";
-			cout << "Имя компрессорной станции: " << cstation.Name << endl;
-			cout << "Введите новое имя кс:";
-			getline(cin, cstation.Name);
+		if ((cstation.NumWShop > 0) && (cstation.NumWShopInWork >=  0) && (cstation.NumWShop >= cstation.NumWShopInWork) && (!cstation.Name.empty())) {
+			cout << "Редактирование кс " << cstation.Name << endl ;
+			cout << "Количество цехов " << cstation.NumWShop << endl;
+			cout << "Количество цехов в работе " << cstation.NumWShopInWork << endl;
+			cout << "1. Включить " << endl << "2. Отключить" << endl << "Выберите действие: ";
+			cin >> cstation.LaunchStop;
 			for (;;) {
-				getline(cin, cstation.Name);
-				if (cin.fail()) {
+				if (cin.fail() || ((cstation.LaunchStop != 1) && (cstation.LaunchStop != 2))){
 					cout << "Ошибка! Данные некорректны\n";
-					cin.clear();
-					cin.ignore(312312, '\n');
-					cout << "Введите название компрессорной станции: ";
-					getline(cin, cstation.Name);
+					CinClear();
+					cout << "1. Включить " << endl << "2. Отключить" << endl << "Выберите действие: ";
+					cin >> cstation.LaunchStop;
 				}
 				else {
-					break;
-				}
-			}
-			cout << "Количество цехов компрессорной станции: " << cstation.NumWShop << endl;
-			cout << "Новое количество цехов компрессорной станции: ";
-			cin >> cstation.NumWShop;
-			for (;;) {
-				if (cin.fail()) {
-					cout << "Ошибка! Данные некорректны\n";
-					cin.clear();
-					cin.ignore(312312, '\n');
-					cout << "Введите количество цехов компрессорной станции: ";
-					cin >> cstation.NumWShop;
-				}
-				else {
-					if (cstation.NumWShop >= 0) {
+					switch (cstation.LaunchStop) {
+					case 1:
+					{
+						cout << "Введите количество цехов, которые необходимо включить: ";
+						cin >> cstation.NumWShopSL;
+						for (;;) {
+							if ((cstation.NumWShopInWork + cstation.NumWShopSL <= cstation.NumWShop) && (cstation.NumWShopSL >= 0)) {
+								cstation.NumWShopInWork += cstation.NumWShopSL;
+								cout << "Количество цехов в работе: " << cstation.NumWShopInWork << endl;
+								return;
+							}
+							else {
+								cout << "Вы включили недопустимое число цехов" << endl;
+								CinClear();
+								cout << "Введите количество цехов, которые необходимо включить: ";
+								cin >> cstation.NumWShopSL;
+							}
+						}
 						break;
 					}
-					else {
-						cout << "Количество цехов должно быть положительно!" << endl;
-						cin.clear();
-						cin.ignore(312312, '\n');
-						cout << "Введите количество цехов компрессорной станции: ";
-						cin >> cstation.NumWShop;
-					}
-				}
-			}
-			cout << "Количество цехов в работе компрессорной станции : " << cstation.NumWShopInWork << endl;
-			cout << "Новое количество цехов в работе компрессорной станции : ";
-			cin >> cstation.NumWShopInWork;
-			for (;;) {
-				if (cin.fail()) {
-					cout << "Ошибка! Данные некорректны\n";
-					cin.clear();
-					cin.ignore(312312, '\n');
-					cout << "Введите количество цехов в работе: ";
-					cin >> cstation.NumWShopInWork;
-				}
-				else {
-					if (cstation.NumWShopInWork >= 0) {
-						if (cstation.NumWShop >= cstation.NumWShopInWork) {
-							break;
+					case 2:
+					{
+						cout << "Введите количество цехов, которые необходимо отключить: ";
+						cin >> cstation.NumWShopSL;
+						for (;;) {
+							if ((cstation.NumWShopInWork - cstation.NumWShopSL >= 0) && (cstation.NumWShopSL >= 0)) {
+								cstation.NumWShopInWork -= cstation.NumWShopSL;
+								cout << "Количество цехов в работе: " << cstation.NumWShopInWork << endl;
+								return;
+							}
+							else {
+								cout << "Вы отключили недопустимое число цехов" << endl;
+								CinClear();
+								cout << "Введите количество цехов, которые необходимо отключить: ";
+								cin >> cstation.NumWShopSL;
+							}
 						}
-						else {
-							cout << "Количество цехов в работе должно быть меньше или равно количеству цехов в целом!" << endl;
-							cin.clear();
-							cin.ignore(312312, '\n');
-							cout << "Введите количество цехов в работе компрессорной станции: ";
-							cin >> cstation.NumWShopInWork;
-						}
+						break;
 					}
-					else {
-						cout << "Количество цехов в работе должно быть положительно!" << endl;
-						cin.clear();
-						cin.ignore(312312, '\n');
-						cout << "Введите количество цехов в работе компрессорной станции: ";
-						cin >> cstation.NumWShopInWork;
 					}
-
+				
 				}
 			}
 			cstation.Efficiency = (double(cstation.NumWShopInWork) / double(cstation.NumWShop)) * 100;
 			cout << "Новая эффективность компрессорной станции: " << cstation.Efficiency << "%" << endl;
-			if (cstation.Launch == 0) {
-				cout << "Кс остановлена" << endl;
-				cout << "Запустить станцию(1 - да, 0 - нет): ";
-				cin >> cstation.Launch;
-				for (;;) {
-					if (cin.fail()) {
-						cout << "Ошибка! Данные некорректны\n";
-						cin.clear();
-						cin.ignore(312312, '\n');
-						cout << "Запустить станцию(1 - да, 0 - нет): ";
-						cin >> cstation.Launch;
-					}
-					else {
-						if ((cstation.Launch != 1) && (cstation.Launch != 0)) {
-							cout << "Ошибка! Данные некорректны\n";
-							cin.clear();
-							cin.ignore(312312, '\n');
-							cout << "Запустить станцию(1 - да, 0 - нет): ";
-							cin >> cstation.Launch;
-						}
-						else {
-							break;
-						}
-					}
-				}
-			}
-			else {
-				cout << "Кс запущена" << endl;
-				cout << "Оставить станцию запущенной(1 - да, 0 - нет): ";
-				cin >> cstation.Launch;
-				for (;;) {
-					if (cin.fail()) {
-						cout << "Ошибка! Данные некорректны\n";
-						cin.clear();
-						cin.ignore(312312, '\n');
-						cout << "Запустить станцию(1 - да, 0 - нет): ";
-						cin >> cstation.Launch;
-					}
-					else {
-						if ((cstation.Launch != 1) && (cstation.Launch != 0)) {
-							cout << "Ошибка! Данные некорректны\n";
-							cin.clear();
-							cin.ignore(312312, '\n');
-							cout << "Запустить станцию(1 - да, 0 - нет): ";
-							cin >> cstation.Launch;
-						}
-						else {
-							break;
-						}
-					}
-				}
-			}
 			if ((cstation.NumWShop > 0) && (cstation.NumWShopInWork > 0) && (cstation.NumWShop >= cstation.NumWShopInWork) && (!cstation.Name.empty())) {
-				MenuClear();
 				cout << "Редактирование прошло успешно" << endl;
 				return;
 			}
@@ -475,6 +323,7 @@ void EditStation(struct Station& cstation) {
 				cout << "Ошибка" << endl;
 				break;
 			}
+
 		}
 		else {
 			cout << "КС не добавлена" << endl;
@@ -483,12 +332,61 @@ void EditStation(struct Station& cstation) {
 	}
 }
 
+void SaveToFile(string filename, struct Pipe& pipe, struct Station& cstation) {
+	ofstream fout;
+	fout.open(filename + ".txt");
+	if (!fout.is_open()) {
+		cout << "Ошибка открытия файла" << endl;
+	}
+	else {
+		if ((pipe.Diameter > 0) && (!cstation.Name.empty())) {
+			fout << "Информация о трубе" << endl;
+			fout << "Длина трубы: " << pipe.Length << endl;
+			fout << "Диаметр трубы: " << pipe.Diameter << endl;
+			if (pipe.InRepair == 1) {
+				fout << "В ремонте: да" << endl;
+			}
+			else {
+				fout << "В ремонте: нет" << endl;
+			}
+			fout << endl;
+			fout << "Информация о кс" << endl;
+			fout << "Имя кс: " << cstation.Name << endl;
+			fout << "Количество цехов кс: " << cstation.NumWShop << endl;
+			fout << "Количество цехов в работе кс: " << cstation.NumWShopInWork << endl;
+			fout << "Эффективность кс: " << cstation.Efficiency << "%" << endl;
+		}
+		else {
+			cout << "Введены не все данные!" << endl;
+		}
+
+	}
+	fout.close();
+}
+
+void LoadFromFile(string filename) {
+	ifstream fin;
+	fin.open(filename + ".txt");
+	if (!fin.is_open()) {
+		cout << "Ошибка открытия файла" << endl;
+	}
+	else {
+		cout << "Файл открыт!" << endl;
+		string str;
+		while (!fin.eof()) {
+			str = "";
+			getline(fin, str);
+			cout << str << endl;
+		}
+	}
+	fin.close();
+}
+
 int main()
 {
 	setlocale(LC_ALL, "Rus");
 	Station cstation;
 	Pipe pipe;
-	pipe.Length = 0;
 	int NumMenu;
 	for (; ; ) {
 		menuPrint();
@@ -496,8 +394,7 @@ int main()
 		cin >> NumMenu;
 		if (cin.fail()) {
 			cout << "Ошибка\n";
-			cin.clear();
-			cin.ignore();
+			CinClear();
 		}
 		else {
 			if ((NumMenu >= 0) && (NumMenu <= 7)) {
@@ -523,9 +420,21 @@ int main()
 					EditStation(cstation);
 					break;
 				case 6:
+				{
+					cout << "Введите название файла: ";
+					string FileName;
+					cin >> FileName;
+					SaveToFile(FileName, pipe, cstation);
 					break;
+				}
 				case 7:
+				{
+					cout << "Введите название файла: ";
+					string FileName;
+					cin >> FileName;
+					LoadFromFile(FileName);
 					break;
+				}
 				case 0:
 					return 0;
 				}
@@ -533,8 +442,7 @@ int main()
 			else {
 				MenuClear();
 				cout << "Ошибка\n";
-				cin.clear();
-				cin.ignore();
+				CinClear();
 
 			}
 		}
