@@ -4,244 +4,294 @@
 #include <vector>
 #include "Pipe.h"
 #include "Station.h"
-
+#include "Utils.h"
+#include "GTS.h"
 
 using namespace std;
 
-
-void menuPrint()
-{
-	cout << "1. Добавить трубу\n";
-	cout << "2. Добавить КС\n";
-	cout << "3. Просмотр всех объектов\n";
-	cout << "4. Редактировать трубу\n";
-	cout << "5. Редактировать КС\n";
-	cout << "6. Сохранить\n";
-	cout << "7. Загрузить\n";
-	cout << "0. Выход\n";
-}
-
-void MenuClear() {
-	system("cls");
-}
-
-template <typename T>
-T GetCorrectNumber(T min, T max) {
-	T x;
-	while ((cin >> x).fail() || x < min || x < max) {
-		cin.clear();
-		cin.ignore(10000, '\n');
-		cout << "Введите число (от " << min << " до" << max << "):";
-	}
-	return x;
-}
-
-//void createPipe(Pipe& pipe)
-//{
-//	cout << "Введите длину трубы: ";
-//	pipe.Length = GetCorrectNumber(0.0, 10000.0);
-//	cout << "Введите диаметр трубы: ";
-//	pipe.Diameter = GetCorrectNumber(0.0, 10000.0);
-//	cout << "В ремонте(1 - да, 0 - нет): ";
-//	cin >> pipe.InRepair;
-//	MenuClear();
-//	cout << "Труба добавлена\n";
-//}
-
-
-//void createCStation(Station& cstation)
-//{
-//	cout << "Введите название компрессорной станции: ";
-//	//getline(cin, cstation.GetName());
-//	cout << cstation.GetName();
-//	cout << "Введите количество цехов компрессорной станции: ";
-//	cstation.NumWShop = GetCorrectNumber(0, 10000);
-//	cout << "Введите количество цехов в работе: ";
-//	cstation.NumWShopInWork = GetCorrectNumber(0, cstation.NumWShop);
-//	cstation.Efficiency = (double(cstation.NumWShopInWork) / double(cstation.NumWShop)) * 100;
-//	MenuClear();
-//	cout << "Эффективность компрессорной станции: " << cstation.Efficiency << "%\n";
-//	cout << "Компрессорная станция добавлена\n";
-//}
-
-void ViewObject(const Pipe& pipe, const Station& cstation) {
-	MenuClear();
-	if ((pipe.Length > 0) || (pipe.Diameter > 0)) {
-		cout << "Длина трубы: " << pipe.Length << endl << "Диаметр трубы: " << pipe.Diameter << endl << "В ремонте: "
-			<< pipe.InRepair << endl;
-	}
-	else {
-		cout << "Вы не добавили трубу" << endl;
-	}
-	if ((cstation.NumWShop > 0) && (cstation.NumWShopInWork > 0) && (cstation.NumWShop >= cstation.NumWShopInWork)) {
-		cout << "Имя компрессорной станции: " << cstation.Name << endl << "Количество цехов компрессорной станции: " << cstation.NumWShop << endl
-			<< "Количество цехов в работе компрессорной станции : " << cstation.NumWShopInWork << endl << "Эффективность компрессорной станции: " << cstation.Efficiency
-			<< "%" << endl;
-	}
-	else {
-		cout << "Вы не добавили кс" << endl;
-	}
-}
-
-
-
-void EditPipe(Pipe& pipe) {
-	MenuClear();
-	cout << "Редактирование трубы\n";
-	cout << "В ремонте: " << pipe.InRepair << endl;
-	cout << "В ремонте? (1 - да, 0 - нет)";
-	cin >> pipe.InRepair;
-
-}
-
-void EditStation(Station& cstation) {
-	MenuClear();
-	cout << "Редактирование кс " << cstation.Name << endl;
-	cout << "Количество цехов " << cstation.NumWShop << endl;
-	cout << "Количество цехов в работе " << cstation.NumWShopInWork << endl;
-	cout << "1. Включить " << endl << "2. Отключить" << endl << "Выберите действие: ";
-	switch (GetCorrectNumber(1, 2)) {
-	case 1:
-	{
-		cout << "Введите количество цехов, которые необходимо включить: ";
-		cstation.NumWShopSL = GetCorrectNumber(0, cstation.NumWShop - cstation.NumWShopInWork);
-	}
-	case 2:
-	{
-		cout << "Введите количество цехов, которые необходимо отключить: ";
-		cstation.NumWShopSL = GetCorrectNumber(0, cstation.NumWShopInWork);
-	}
-	cstation.Efficiency = (double(cstation.NumWShopInWork) / double(cstation.NumWShop)) * 100;
-	cout << "Новая эффективность компрессорной станции: " << cstation.Efficiency << "%" << endl;
-	cout << "Редактирование прошло успешно" << endl;
-	}
-}
-void SaveToFile(string filename, Pipe& pipe, Station& cstation) {
+void SaveToFile(string filename, vector <Pipe> pipes, vector <Station> cstations) {
 	ofstream fout;
-	fout.open(filename + ".txt");
+	fout.open(filename + ".txt", ios::out);
 	if (!fout.is_open()) {
 		cout << "Ошибка открытия файла" << endl;
 	}
 	else {
-		if (pipe.Diameter > 0) {
-			fout << "1" << endl;
-			fout << pipe.Length << endl;
-			fout << pipe.Diameter << endl;
-			fout << pipe.InRepair << endl;
+		for (auto& i : pipes) {
+			fout << "p" << endl
+				<< i.Name << endl
+				<< i.id << endl
+				<< i.Length << endl
+				<< i.Diameter << endl
+				<< i.InRepair << endl;
 		}
-		if (!cstation.Name.empty()) {
-			fout << "2" << endl;
-			fout << cstation.Name << endl;
-			fout << cstation.NumWShop << endl;
-			fout << cstation.NumWShopInWork << endl;
-			fout << cstation.Efficiency << endl;
+		for (auto& i : cstations) {
+			fout << "s" << endl <<
+				i.Name << endl << i.id <<
+				endl << i.NumWShop << endl <<
+				i.NumWShopInWork << endl <<
+				i.Efficiency << endl;
 		}
 	}
-	cout << "Данные загружены";
+	cout << "Данные загружены" << endl;
 	fout.close();
 }
 
-void LoadFromFile(string filename, Pipe& pipe, Station& cstation) {
+void LoadFromFile(string filename, vector <Pipe>& pipes, vector <Station>& stations) {
 	ifstream fin;
-	int q = 0;
-	fin.open(filename + ".txt");
+	fin.open(filename + ".txt", ios::in);
 	if (!fin.is_open()) {
 		cout << "Ошибка открытия файла" << endl;
 	}
 	else {
 		cout << "Файл открыт!" << endl;
-		string str;
-		getline(fin, str);
-		if (str == "1") {
-			fin >> pipe.Length;
-			fin >> pipe.Diameter;
-			fin >> pipe.InRepair;
-			getline(fin, str);
-			getline(fin, str);
+		bool empty = false;
+		while (!fin.eof()) {
+			char ch;
+			empty = true;
+			fin >> ch;
+			if (ch == 'p') {
+				Pipe p;
+				fin >> ws;
+				getline(fin, p.Name);
+				fin >> p.id >> p.Diameter >>  p.Length  >> p.InRepair;
+				pipes.push_back(p);
+			}
+			if (ch == 's') {
+				Station cs;
+				fin >> ws;
+				getline(fin, cs.Name);
+				fin >> cs.id >> cs.NumWShop >> cs.NumWShopInWork >> cs.Efficiency;
+				stations.push_back(cs);
+			}
+			ch = 'smth';
 		}
-		if (str == "2") {
-			getline(fin, cstation.Name);
-			fin >> cstation.NumWShop;
-			fin >> cstation.NumWShopInWork;
-			fin >> cstation.Efficiency;
-		}
-	}
-	fin.close();
-}
-ostream&  operator << (ostream& out, Station& cstation) {
-	if ((cstation.NumWShop > 0) && (cstation.NumWShopInWork > 0) && (cstation.NumWShop >= cstation.NumWShopInWork)) {
-		cout << "Имя компрессорной станции: " << cstation.Name << endl << "Количество цехов компрессорной станции: " << cstation.NumWShop << endl
-			<< "Количество цехов в работе компрессорной станции : " << cstation.NumWShopInWork << endl << "Эффективность компрессорной станции: " << cstation.Efficiency
-			<< "%" << endl;
-	}
-	else {
-		cout << "Вы не добавили кс" << endl;
+		cout << ((empty) ? "Успешно загрузилось" : "Файл пустой") << endl;
+		fin.close();
 	}
 }
 
-istream& operator >> (istream& in, Station& cstation) {
-	cout << "Введите название компрессорной станции: ";
-	in >> cstation.GetName();
-	cout << cstation.GetName();
-	cout << "Введите количество цехов компрессорной станции: ";
-	cstation.NumWShop = GetCorrectNumber(0, 10000);
-	cout << "Введите количество цехов в работе: ";
-	cstation.NumWShopInWork = GetCorrectNumber(0, cstation.NumWShop);
-	cstation.Efficiency = (double(cstation.NumWShopInWork) / double(cstation.NumWShop)) * 100;
-	MenuClear();
-	cout << "Эффективность компрессорной станции: " << cstation.Efficiency << "%\n";
-	cout << "Компрессорная станция добавлена\n";
+Pipe& IndexPipe(vector<Pipe>& p) {
+	cout << "Введите индекс трубы:";
+	size_t q = 1;
+	int index = GetCorrectNumber(q, p.size());
+	return p[index - 1];
 }
+
+Station& IndexStation(vector<Station>& s) {
+	cout << "Введите индекс станции:";
+	size_t q = 1;
+	int index = GetCorrectNumber(q, s.size());
+	return s[index - 1];
+}
+
+
+template<typename T>
+void EditPipes(vector <Pipe> pipes, T param) {
+	string name;
+	bool onezero;
+	if (pipes.size() > 0) {
+		for (int i : FindPipesByFilter(pipes, CheckByNamep, param))
+			cout << pipes[i];
+		cout << "1. Редактировать все" << endl;
+		cout << "2. Редактировать по выбору" << endl;
+		cout << "3. Удалить все" << endl;
+		cout << "4. Удалить по выбору" << endl;
+		cout << "5. Выход" << endl;
+		switch (GetCorrectNumber(1, 5)) {
+		case 1: {
+			cout << "1. Изменить название" << endl;
+			cout << "2. Изменить статус в работе" << endl;
+			switch (GetCorrectNumber(1, 2)) {
+			case 1: {
+				cout << "Введите новое название:";
+				cin >> name;
+				for (size_t i : pipes.size())
+					pipes[i].Name = name;
+			}
+			case 2: {
+				cout << "Введите статус в работе:";
+				cin >> onezero;
+				for (int i : pipes.size())
+					pipes[i].InRepair = onezero;
+			}
+			}
+		}
+		case 2: {
+			cout << "1. Редактировать по названию" << endl;
+			cout << "2. Редактировать по  статусу в работе" << endl;
+			switch (GetCorrectNumber(1, 2)) {
+			case 1: {
+				cout << "Введите название: ";
+				cin >> name;
+				cout << "Изменить статус в работе: " << endl;
+				cin >> onezero;
+				for (int i : FindPipesByFilter(pipes, CheckByNamep, name)) {
+					pipes[i].InRepair = onezero;
+				}
+			}
+			case 2: {
+				cout << "В работе: ";
+				cin >> onezero;
+				cout << "Изменить название: " << endl;
+				cin >> name;
+				for (int i : FindPipesByFilter(pipes, CheckByRepair, onezero)) {
+					pipes[i].Name = name;
+				}
+			}
+			}
+		}
+		case 3: {
+
+		}
+		case 4: {
+
+		}
+		case 5: {
+			break;
+		}
+		}
+	}
+	else {
+		cout << "Ничего не найдено" << endl;
+	}
+}
+
+void  FindPipes(vector <Pipe> pipes) {
+	cout << "1. Поиск по названию" << endl;
+	cout << "2. Поиск по признаку в ремонте" << endl;
+	cout << "Выберите пункт:";
+	switch (GetCorrectNumber(1, 3)) {
+	case 1:
+	{
+		string name;
+		cout << "Название: ";
+		cin >> name;
+		if (pipes.size() > 0) {
+			for (int i : FindByFilter(pipes, CheckByName, name))
+				cout << pipes[i];
+		}
+		break;
+	}
+	case 2:
+	{
+		bool onezero;
+		cout << "В ремонте: ";
+		cin >> onezero;
+		for (int i : FindByFilter(pipes, CheckByRepair, onezero))
+			cout << pipes[i];
+		break;
+	}
+	}
+}
+
 
 int main()
 {
 	setlocale(LC_ALL, "Rus");
-	vector <Station> cstation;
-	vector <Pipe> pipe;
+	vector <Station> cstations;
+	vector <Pipe> pipes;
 	string FileName;
 	for (; ; ) {
 		menuPrint();
 		cout << "Выберите пункт меню: ";
-		switch (GetCorrectNumber(0, 7)) {
-		case 1:
+		switch (GetCorrectNumber(0, 11)) {
+		case 1: {
+			Pipe pipe;
 			MenuClear();
-			createPipe(pipe);
+			cin >> pipe;
+			pipes.push_back(pipe);
 			break;
-		case 2:
+		}
+		case 2: {
+			Station cstation;
 			MenuClear();
-			createCStation(cstation);
+			cin >> cstation;
+			cstations.push_back(cstation);
 			break;
-		case 3:
+		}
+		case 3: {
 			MenuClear();
-			ViewObject(pipe, cstation);
+			if (pipes.size() > 0) {
+				cout << IndexPipe(pipes);
+			}
+			else {
+				cout << "Труб нет" << endl;
+			}
+			if (cstations.size() > 0) {
+				cout << IndexStation(cstations);
+			}
+			else {
+				cout << "Станций нет" << endl;
+			}
 			break;
-		case 4:
+		}
+		case 4: {
 			MenuClear();
-			EditPipe(pipe);
+			EditPipe(IndexPipe(pipes));
 			break;
-		case 5:
+		}
+		case 5: {
 			MenuClear();
-			EditStation(cstation);
+			EditStation(IndexStation(cstations));
 			break;
-		case 6:
-		{
-			cout << "Введите название файла: ";
+		}
+		case 6:{
+			cout << "Введите название файла: " << endl;
 			getline(cin, FileName);
 			getline(cin, FileName);
-			SaveToFile(FileName, pipe, cstation);
+			SaveToFile(FileName, pipes, cstations);
 			break;
 		}
 		case 7:
 		{
-			cout << "Введите название файла: ";
+			cout << "Введите название файла:";
 			getline(cin, FileName);
 			getline(cin, FileName);
-			LoadFromFile(FileName, pipe, cstation);
+			LoadFromFile(FileName, pipes, cstations);
 			break;
+		}
+		case 8:
+		{
+			FindPipes(pipes);
+			break;
+		}
+		case 9:
+		{
+			cout << "1. Поиск по названию" << endl;
+			cout << "2. Поиск по проценту незадействованных цехов" << endl;
+			switch (GetCorrectNumber(1, 2)) {
+			case 1:
+			{
+				string name;
+				cout << "Название: ";
+				cin >> name;
+				for (int i : FindByFilter(cstations, CheckByName, name))
+					cout << cstations[i];
+				break;
+			}
+			case 2:
+			{
+				double percent;
+				cout << "Процент: ";
+				cin >> percent;
+				for (int i : FindByFilter(cstations, CheckByEfficiency, percent))
+					cout << cstations[i];
+				break;
+			}
+			}
+			break;
+
+		}
+		case 10:
+		{
+
+		}
+		case 11:
+		{
+
 		}
 		case 0:
 			return 0;
 		}
 	}
-	return 0;
 }

@@ -85,7 +85,7 @@ istream& operator >> (istream& in, Station& s) {
 }
 
 ostream& operator << (ostream& out, const Station& s) {
-	out << endl << "Станция" << endl << ": " << s.name << endl
+	out << endl << "Компрессорная станция" << endl << ": " << s.name << endl
 		<< "ID: " << s.id << endl
 		<< "Количество цехов: " << s.workshop << endl
 		<< "Количество цехов в работе: " << s.workshopInWork << endl
